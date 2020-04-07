@@ -1,0 +1,50 @@
+version: "3.4"
+ 
+services:
+ 
+  demo_monitoring_elasticsearch:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:7.1.1"
+    hostname: "monitoring-elasticsearch"
+    environment:
+      node.name: "monitoring_node"
+      discovery.type: "single-node"
+      cluster.name: "monitoring_cluster"
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      PS1: "\\u@\\h:\\w\\$$ "
+    ulimits:
+      memlock:
+        soft: "-1"
+        hard: "-1"
+    ports:
+      - "9200:9200"
+    volumes:
+      - "./data/elasticsearch:/usr/share/elasticsearch/data"
+ 
+  demo_monitoring_fluent_bit:
+    image: "fluent/fluent-bit:1.0.4"
+    hostname: "monitoring-fluent-bit"
+    ports:
+      - "24224:24224"
+    depends_on:
+      - "demo_monitoring_elasticsearch"
+    volumes:
+      - "./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro"
+ 
+  demo_monitoring_kibana:
+    image: "docker.elastic.co/kibana/kibana:7.1.1"
+    hostname: "monitoring-kibana"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://demo_monitoring_elasticsearch:9200"
+    ports:
+      - "5601:5601"
+    depends_on:
+      - "demo_monitoring_elasticsearch"
+ 
+  demo_monitoring_elastichq:
+    image: "elastichq/elasticsearch-hq"
+    hostname: "monitoring-elastichq"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - "demo_monitoring_elasticsearch"

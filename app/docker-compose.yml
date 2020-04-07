@@ -1,0 +1,41 @@
+version: "3.4"
+ 
+services:
+ 
+  demo_wait_php:
+    build:
+      context: "./php"
+    hostname: "wait-php"
+    volumes:
+      - "..:/app"
+    environment:
+      PS1: "\\u@\\h:\\w\\$$ "
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "demo_monitoring_fluent_bit"
+        tag: "wait_php"
+        mode: "non-blocking"
+        max-buffer-size: "2m"
+        fluentd-async-connect: "true"
+ 
+  demo_wait_nginx:
+    build:
+      context: "./nginx"
+    hostname: "wait-nginx"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "..:/app"
+    depends_on:
+      - "demo_wait_php"
+    environment:
+      PS1: "\\u@\\h:\\w\\$$ "
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "demo_monitoring_fluent_bit"
+        tag: "wait_nginx"
+        mode: "non-blocking"
+        max-buffer-size: "2m"
+        fluentd-async-connect: "true"

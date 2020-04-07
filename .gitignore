@@ -1,0 +1,9 @@
+# OSX
+.DS_Store
+
+# Configuration directory
+.vscode/
+.idea/
+
+# Docker storage
+/monitor/data
